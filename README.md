@@ -1,12 +1,6 @@
 # RiskSizer
 
-使用MEXC資料。輸入每單預計最大虧損 USDT 與止損價格，系統自動抓取目前市價，依照進場價與止損價的距離反推出建議總倉位，讓每筆交易打到止損時的虧損金額盡量接近你設定的固定 USDT。工具支援 MEXC 交易對搜尋、最新價格帶入、手動覆寫進場價，以及可選的止盈獲利估算，採用純前端 HTML、CSS、Vanilla JavaScript 製作，可直接部署到 GitHub Pages。
-
-## Demo
-
-After publishing with GitHub Pages, open:
-
-`https://<your-github-username>.github.io/RiskSizer/`
+使用MEXC資料。輸入每單預計最大虧損 USDT 與止損價格，系統自動抓取目前市價，依照進場價與止損價的距離反推出建議總倉位，讓每筆交易打到止損時的虧損金額盡量接近你設定的固定 USDT。工具支援 MEXC 交易對搜尋、最新價格帶入、手動覆寫進場價，以及可選的止盈獲利估算，採用純前端 HTML、CSS、Vanilla JavaScript 製作。
 
 ## Features
 
@@ -55,15 +49,6 @@ estimated_profit =
 2. Open `index.html` in a browser.
 
 If the MEXC pair list cannot be loaded because of browser CORS restrictions, you can still type a full symbol like `TAOUSDT` and click `使用最新價格`.
-
-## GitHub Pages
-
-1. Push this repository to GitHub.
-2. In the repository settings, open `Pages`.
-3. Set the source to deploy from the main branch.
-4. Use the root folder (`/`) as the publish directory.
-
-GitHub Pages will serve the static files directly. No build step is needed.
 
 ## Files
 
