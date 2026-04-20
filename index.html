@@ -76,7 +76,7 @@
 
         <div class="status-row">
           <div id="statusMessage" class="status-pill neutral">準備就緒</div>
-          <div class="meta-note">Position buffer: <strong>0.98</strong></div>
+          <div class="meta-note">Fee-aware sizing: <strong>buffer 0.98</strong> + <strong>fee 0.10%</strong></div>
         </div>
       </section>
 
@@ -90,7 +90,7 @@
           <article class="result-card result-focus">
             <span class="result-label">Position USDT</span>
             <strong id="positionUsdtValue" class="result-value">--</strong>
-            <small>已套用 0.98 buffer</small>
+            <small>依 stop distance 與預估 round-trip fee 一起計算</small>
           </article>
 
           <article class="result-card">
@@ -116,6 +116,11 @@
           <article class="result-card">
             <span class="result-label">Estimated Loss</span>
             <strong id="lossValue" class="result-value">--</strong>
+          </article>
+
+          <article class="result-card">
+            <span class="result-label">Estimated Fee</span>
+            <strong id="feeValue" class="result-value">--</strong>
           </article>
 
           <article class="result-card">

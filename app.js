@@ -1,6 +1,7 @@
 const MEXC_EXCHANGE_INFO_URL = "https://api.mexc.com/api/v3/exchangeInfo";
 const MEXC_TICKER_PRICE_URL = "https://api.mexc.com/api/v3/ticker/price";
 const POSITION_BUFFER = 0.98;
+const ESTIMATED_ROUND_TRIP_FEE_RATE = 0.001;
 const SYMBOL_CACHE_KEY = "riskSizer.mexc.exchangeInfo";
 const REQUEST_TIMEOUT_MS = 8000;
 const CORS_PROXIES = [
@@ -33,6 +34,7 @@ const elements = {
   positionUsdtValue: document.getElementById("positionUsdtValue"),
   qtyValue: document.getElementById("qtyValue"),
   lossValue: document.getElementById("lossValue"),
+  feeValue: document.getElementById("feeValue"),
   profitValue: document.getElementById("profitValue"),
 };
 
@@ -154,7 +156,33 @@ function clearResultsPanel() {
   elements.positionUsdtValue.textContent = "--";
   elements.qtyValue.textContent = "--";
   elements.lossValue.textContent = "--";
+  elements.feeValue.textContent = "--";
   elements.profitValue.textContent = "--";
+}
+
+function calculatePositionSizing({ riskUsdt, entryPrice, stopLossPrice }) {
+  const effectiveRisk = riskUsdt * POSITION_BUFFER;
+  const distance = Math.abs(entryPrice - stopLossPrice);
+  const priceLossRatio = distance / entryPrice;
+  const totalLossRatio = priceLossRatio + ESTIMATED_ROUND_TRIP_FEE_RATE;
+  const positionUsdt = effectiveRisk / totalLossRatio;
+  const qty = positionUsdt / entryPrice;
+  const estimatedPriceLoss = positionUsdt * priceLossRatio;
+  const estimatedFeeLoss = positionUsdt * ESTIMATED_ROUND_TRIP_FEE_RATE;
+  const estimatedLoss = estimatedPriceLoss + estimatedFeeLoss;
+
+  return {
+    effectiveRisk,
+    distance,
+    priceLossRatio,
+    totalLossRatio,
+    positionUsdt,
+    qty,
+    estimatedPriceLoss,
+    estimatedFeeLoss,
+    estimatedLoss,
+    feeRateApplied: ESTIMATED_ROUND_TRIP_FEE_RATE,
+  };
 }
 
 function getSymbolInputValue() {
@@ -264,22 +292,25 @@ function updateResults() {
     }
   }
 
-  const rawPositionUsdt = (risk * entry) / distance;
-  const positionUsdt = rawPositionUsdt * POSITION_BUFFER;
-  const qty = positionUsdt / entry;
+  const calcResult = calculatePositionSizing({
+    riskUsdt: risk,
+    entryPrice: entry,
+    stopLossPrice: stop,
+  });
   const estimatedProfit =
     takeProfit === null
       ? null
       : side === "LONG"
-        ? qty * (takeProfit - entry)
-        : qty * (entry - takeProfit);
+        ? calcResult.qty * (takeProfit - entry)
+        : calcResult.qty * (entry - takeProfit);
 
   elements.entryValue.textContent = formatNumber(entry, 8);
   elements.stopValue.textContent = formatNumber(stop, 8);
-  elements.distanceValue.textContent = formatNumber(distance, 8);
-  elements.positionUsdtValue.textContent = formatFixed(positionUsdt, 2);
-  elements.qtyValue.textContent = formatFixed(qty, 4);
-  elements.lossValue.textContent = formatFixed(risk, 2);
+  elements.distanceValue.textContent = formatNumber(calcResult.distance, 8);
+  elements.positionUsdtValue.textContent = formatFixed(calcResult.positionUsdt, 2);
+  elements.qtyValue.textContent = formatFixed(calcResult.qty, 4);
+  elements.lossValue.textContent = formatFixed(calcResult.estimatedLoss, 2);
+  elements.feeValue.textContent = formatFixed(calcResult.estimatedFeeLoss, 2);
   elements.profitValue.textContent = estimatedProfit === null ? "--" : formatFixed(estimatedProfit, 2);
 
   setStatus("計算完成", "success");
